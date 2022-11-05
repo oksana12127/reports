@@ -34,6 +34,7 @@ MONTHS = {
 def get_departments_to_dict():
     departments = pd.read_excel('./media/files/departments.xlsx', engine='openpyxl',
                                 header=6) # not .xlsx, reading started from line 7, 7th taken as heading
+                                        # engine='openpyxl' - for excel 2003 (xlsx)
     departments_to_dict_nan = pd.DataFrame(departments)
     # print('department+s_to_dict_nan', departments_to_dict_nan)
     departments_to_dict_null = departments_to_dict_nan.fillna(0)
