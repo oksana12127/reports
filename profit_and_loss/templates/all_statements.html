@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Financial statement</h1>
+
+    <p>Welcome to <em>Financial statements</em></p>
+
+    <a href="{% url 'p_and_l' %}"><h2>P$L forecast - actual</h2></a>
+    <a href="{% url 'sales_by_customer' %}"><h2>sales by customer</h2></a>
+    <a href="{% url 'sales_by_department' %}"><h2>sales by department</h2></a>
+    <a href="{% url 'upload_result' %}"><h2>upload_result</h2></a>
+
+
+
+
+
+
+{% endblock %}
