@@ -36,7 +36,26 @@ def get_departments_to_dict():
                                 header=6) # not .xlsx, reading started from line 7, 7th taken as heading
                                         # engine='openpyxl' - for excel 2003 (xlsx)
     departments_to_dict_nan = pd.DataFrame(departments)
-    # print('department+s_to_dict_nan', departments_to_dict_nan)
+    print('department+s_to_dict_nan', departments_to_dict_nan)
+    departments_to_dict_null = departments_to_dict_nan.fillna(0)
+    print('ALL departments_to_dict_null', departments_to_dict_null)
+    departments_to_dict = departments_to_dict_null.to_dict('records')
+    print('DICTIONARIES', departments_to_dict)
+    # departments_to_dict_null = pd.DataFrame(departments_to_dict_nan)
+    # print('departments_to_dict_null', departments_to_dict_null)
+    # departments_to_dict = departments_to_dict_null.fillna(0)
+    # print('ALL DICTIONARIES', departments_to_dict)
+
+    return departments_to_dict
+
+
+def get_all_to_dict():
+    departments = pd.read_excel('./media/files/departments.xlsx', engine='openpyxl',
+                                header=6, sheet_name=None) # not .xlsx, reading started from line 7, 7th taken as heading
+                                        # engine='openpyxl' - for excel 2003 (xlsx)
+    df_sheet1 = departments['Sheet 1']
+    departments_to_dict_nan = pd.DataFrame(df_sheet1)
+    print('department+s_to_dict_nan', departments_to_dict_nan)
     departments_to_dict_null = departments_to_dict_nan.fillna(0)
     # print('ALL departments_to_dict_null', departments_to_dict_null)
     departments_to_dict = departments_to_dict_null.to_dict('records')
@@ -82,7 +101,7 @@ def save_data_by_department():
                 months_of_report = key_date[0]
                 date_of_string = MONTHS[months_of_report] + ' ' + key_date[1]
                 key_db = datetime.datetime.strptime(date_of_string, '%B %Y')
-                # print('key_db', key_db, value, updated_d['name'], updated_d['Підрозділ'])
+                print('key_db', key_db, value, updated_d['name'], updated_d['Підрозділ'])
 
                 if DepartmentsMonth.objects.filter(name=updated_d['name'], buyer_category=updated_d['Підрозділ'],
                                                    date=key_db).exists():
@@ -103,7 +122,36 @@ def save_data_by_department():
 
 # save_data_by_department()
 
-
+def save_all_data():
+    # print('departments_to_dict', departments_to_dict)
+    updated_departments_to_dict = []
+    current_name = ''
+    departments_to_dict = get_departments_to_dict()
+    for d in departments_to_dict:
+        # print('DICTIONARIES', d)
+        for key, value in d.items():
+            print(key, value)
+            if value in DEPARTMENTS:
+                # print('DEPARTMENTS value', value)
+                current_name = value
+            # print(current_name)
+        updated_departments_to_dict.append(d)
+        # updated_departments_to_dict[-1]['buyer_category'] = current_buyer
+        updated_departments_to_dict[-1]['name'] = current_name
+    # print('updated_departments_to_dict', updated_departments_to_dict)
+    del departments_to_dict[0]
+    del departments_to_dict[0]
+    for updated_d in departments_to_dict:
+        # print('updated_d', updated_d)
+        for key, value in updated_d.items():
+            # print('d.items:', key, value, updated_d['name'], updated_d['buyer_category'])
+            if key != 'Підрозділ' and key != 'name':
+                # print('KEY !=', key, value, updated_d['name'], updated_d['buyer_category'])
+                key_date = key.split()
+                months_of_report = key_date[0]
+                # date_of_string = MONTHS[months_of_report] + ' ' + key_date[1]
+                # key_db = datetime.datetime.strptime(date_of_string, '%B %Y')
+                # print('key_db', key_db, value, updated_d['name'], updated_d['Підрозділ'])
 
 
 
@@ -119,17 +167,17 @@ def additional_code():
     #  sifted through the table:
     print('ALL DICTIONARIES')
     line_of_tables_departments = 0
-    while line_of_tables_departments < len(departments_to_dict):
-        print(line_of_tables_departments, departments_to_dict[line_of_tables_departments])
+    while line_of_tables_departments < len(get_departments_to_dict):
+        print(line_of_tables_departments, get_departments_to_dict[line_of_tables_departments])
 
         line_of_tables_departments += 1
 
 
     # print('departments_to_dict', departments_to_dict)
-    print('Підрозділ LISTS', departments['Підрозділ'].tolist())  # data from a column and convert it to a list of values
+    print('Підрозділ LISTS', get_departments_to_dict['Підрозділ'].tolist())  # data from a column and convert it to a list of values
 
-    departments_to_dict_service = next(x for x in departments_to_dict if x["Підрозділ"] == "Сервис")
-    departments_to_dict_employee = list(filter(lambda item: item['Підрозділ'] == 'Сотрудники', departments_to_dict))
+    departments_to_dict_service = next(x for x in get_departments_to_dict if x["Підрозділ"] == "Сервис")
+    departments_to_dict_employee = list(filter(lambda item: item['Підрозділ'] == 'Сотрудники', get_departments_to_dict))
     # print(departments)
     print(departments_to_dict_service)
     print(departments_to_dict_employee)
@@ -147,7 +195,7 @@ def additional_code():
     print('d2_none + d1_none', (d2_none + d1_none))
     print(type(d1_none))
 
-    print('Excel Sheet to Dict:', departments_to_dict[4])  # read the 4th line
+    print('Excel Sheet to Dict:', get_departments_to_dict[4])  # read the 4th line
 
 # @login_required
 # def date_period():

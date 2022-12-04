@@ -154,3 +154,4 @@ templates/temp.html
 reports_env
 .DS_Store
 /static
+departments.xlsx

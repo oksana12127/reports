@@ -18,7 +18,7 @@ from uuid import uuid4
 #
 #         return wrapper
 
-#
+
 # def path_and_rename(instance, filename):
 #     ext = filename.split('.')[-1]
 #     filename_start = filename.replace('.' + ext, '')
@@ -103,3 +103,5 @@ class DepartmentsMonth(models.Model):
     buyer_category = models.CharField(max_length=255, blank=False, null=False)
     date = models.DateField(null=True, blank=True, default=None)
     value = models.FloatField(null=True, blank=True, default=None)
+    # cost_price = models.FloatField(null=True, blank=True, default=None)
+    # quantity = models.FloatField(null=True, blank=True, default=None)
