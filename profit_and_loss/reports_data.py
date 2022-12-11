@@ -51,11 +51,10 @@ def get_departments_to_dict():
 
 def get_all_to_dict():
     departments = pd.read_excel('./media/files/departments.xlsx', engine='openpyxl',
-                                header=6, sheet_name=None) # not .xlsx, reading started from line 7, 7th taken as heading
-                                        # engine='openpyxl' - for excel 2003 (xlsx)
-    df_sheet1 = departments['Sheet 1']
-    departments_to_dict_nan = pd.DataFrame(df_sheet1)
-    print('department+s_to_dict_nan', departments_to_dict_nan)
+                                header=[6, 7, 8, 9])  # not .xlsx, reading started from line 7, 7th taken as heading
+    # engine='openpyxl' - for excel 2003 (xlsx)
+    departments_to_dict_nan = pd.DataFrame(departments)
+    # print('department+s_to_dict_nan', departments_to_dict_nan)
     departments_to_dict_null = departments_to_dict_nan.fillna(0)
     # print('ALL departments_to_dict_null', departments_to_dict_null)
     departments_to_dict = departments_to_dict_null.to_dict('records')
@@ -67,7 +66,9 @@ def get_all_to_dict():
 
     return departments_to_dict
 
+
 DEPARTMENTS = ['X1', 'Основное', 'Сервис', 'Кафе Коцюбинское']
+PRODUCT = []
 
 
 
@@ -77,8 +78,9 @@ def save_data_by_department():
     updated_departments_to_dict = []
     current_name = ''
     departments_to_dict = get_departments_to_dict()
+    print('departments_to_dict 1', departments_to_dict)
     for d in departments_to_dict:
-        # print('DICTIONARIES', d['Підрозділ'])
+        print('DICTIONARIES', d)
         for key, value in d.items():
             # print(key, value)
             if value in DEPARTMENTS:
@@ -86,13 +88,16 @@ def save_data_by_department():
                 current_name = value
             # print(current_name)
         updated_departments_to_dict.append(d)
+        print('updated_departments_to_dict 1', updated_departments_to_dict)
         # updated_departments_to_dict[-1]['buyer_category'] = current_buyer
         updated_departments_to_dict[-1]['name'] = current_name
-    # print('updated_departments_to_dict', updated_departments_to_dict)
+    print('updated_departments_to_dict 2', updated_departments_to_dict)
+    print('departments_to_dict 2', departments_to_dict)
     del departments_to_dict[0]
     del departments_to_dict[0]
+
     for updated_d in departments_to_dict:
-        # print('updated_d', updated_d)
+        print('updated_d', updated_d)
         for key, value in updated_d.items():
             # print('d.items:', key, value, updated_d['name'], updated_d['buyer_category'])
             if key != 'Підрозділ' and key != 'name':
@@ -123,35 +128,38 @@ def save_data_by_department():
 # save_data_by_department()
 
 def save_all_data():
-    # print('departments_to_dict', departments_to_dict)
     updated_departments_to_dict = []
+    new_departments_to_dict = []
+    # finish_departments_to_dict = []
     current_name = ''
-    departments_to_dict = get_departments_to_dict()
+    departments_to_dict = get_all_to_dict()
     for d in departments_to_dict:
-        # print('DICTIONARIES', d)
         for key, value in d.items():
-            print(key, value)
             if value in DEPARTMENTS:
-                # print('DEPARTMENTS value', value)
                 current_name = value
-            # print(current_name)
         updated_departments_to_dict.append(d)
-        # updated_departments_to_dict[-1]['buyer_category'] = current_buyer
         updated_departments_to_dict[-1]['name'] = current_name
-    # print('updated_departments_to_dict', updated_departments_to_dict)
-    del departments_to_dict[0]
-    del departments_to_dict[0]
-    for updated_d in departments_to_dict:
-        # print('updated_d', updated_d)
-        for key, value in updated_d.items():
-            # print('d.items:', key, value, updated_d['name'], updated_d['buyer_category'])
-            if key != 'Підрозділ' and key != 'name':
-                # print('KEY !=', key, value, updated_d['name'], updated_d['buyer_category'])
-                key_date = key.split()
-                months_of_report = key_date[0]
-                # date_of_string = MONTHS[months_of_report] + ' ' + key_date[1]
-                # key_db = datetime.datetime.strptime(date_of_string, '%B %Y')
-                # print('key_db', key_db, value, updated_d['name'], updated_d['Підрозділ'])
+    line_of_tables_departments = 0
+    for to_dict in updated_departments_to_dict:
+        del to_dict[('Unnamed: 0_level_0', 'Unnamed: 0_level_1', 'Unnamed: 0_level_2', 'Unnamed: 0_level_3')]
+        to_dict['buyer_category'] = to_dict.pop(('Підрозділ', 'Покупець (категорії)', 'Unnamed: 1_level_2', 'Unnamed: 1_level_3'))
+        new_departments_to_dict.append(to_dict)
+
+    for new_dict in new_departments_to_dict:
+        for key, value in list(new_dict.items()):
+            if key[3] != 'З ПДВ' and key[3] != 'Од. звітів' and key != 'buyer_category' and key != 'name':
+                del new_dict[key]
+
+    for finish_dict in new_departments_to_dict:
+        line_of_tables_departments += 1
+        print(line_of_tables_departments)
+        for key, value in finish_dict.items():
+            print('key, value', key, value)
+
+
+
+
+
 
 
 

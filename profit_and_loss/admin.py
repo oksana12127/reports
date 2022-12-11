@@ -6,8 +6,8 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Result
-# from .reports_data import save_all_data
-from .reports_data import save_data_by_department
+from .reports_data import save_all_data
+# from .reports_data import save_data_by_department
 
 
 # class SaveData(admin.ModelAdmin):
@@ -26,15 +26,16 @@ class SaveData(admin.ModelAdmin):
             print('ONE')
         super().save_model(request, obj, form, change)
         print('TWO')  # здесь падает, если проблемы с файлом
-        # save_all_data()
-        try:
-            save_data_by_department()
-        except Exception:
-            print('some error')
-            messages.error(request, "INCORRECT FILE OR DATA FORMAT! TRY AGAIN AFTER THE FIX!")
-            messages.error(request,
-                           "НЕ ВІРНИЙ ФОРМАТ ФАЙЛУ АБО ДАНИХ! СПРОБУЙТЕ ЗНОВУ ПІСЛЯ ВИПРАВЛЕННЯ!")
+        save_all_data()
 
+        # try:
+        #     save_data_by_department()
+        # except Exception:
+        #     print('some error')
+        #     messages.error(request, "INCORRECT FILE OR DATA FORMAT! TRY AGAIN AFTER THE FIX!")
+        #     messages.error(request,
+        #                    "НЕ ВІРНИЙ ФОРМАТ ФАЙЛУ АБО ДАНИХ! СПРОБУЙТЕ ЗНОВУ ПІСЛЯ ВИПРАВЛЕННЯ!")
+        #
         # print('THREE')
 
 
