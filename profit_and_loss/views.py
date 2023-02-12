@@ -278,7 +278,8 @@ def sales_by_department(request):
                     sale_first_cost_price = sale_first.cost_price
 
                     sale_margin[date] = sale_first_sale_value - sale_first_cost_price
-                    sale_profitability[date] = int((sale_first_sale_value - sale_first_cost_price)/sale_first_sale_value * 100) / 100
+                    sale_profitability[date] = int(
+                        (sale_first_sale_value - sale_first_cost_price) / sale_first_sale_value * 100) / 100
 
         sale_list.append(sale_first)
 
@@ -289,7 +290,7 @@ def sales_by_department(request):
                     date] = filter_department_margin.sale_value - filter_department_margin.cost_price
                 filter_department_serves_profitability[
                     date] = int((
-                                            filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100
+                                        filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100
 
     for filter_department_margin in filter_department:
         if filter_department_margin.name == 'Кафе':
@@ -298,7 +299,7 @@ def sales_by_department(request):
                     (filter_department_margin.sale_value - filter_department_margin.cost_price) * 100) / 100
                 filter_department_cafe_profitability[
                     date] = int((
-                                            filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100
+                                        filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100
 
     department_names = DepartmentsAllData.objects.values('name').distinct()
     today = datetime.datetime.today()
@@ -323,4 +324,5 @@ def sales_by_department(request):
                    'filter_department_cafe_margin': filter_department_cafe_margin, 'profitability': profitability,
                    'filter_profitability_employees': filter_profitability_employees,
                    'filter_department_serves_profitability': filter_department_serves_profitability,
-                   'filter_department_cafe_profitability': filter_department_cafe_profitability, 'sale_profitability': sale_profitability})
+                   'filter_department_cafe_profitability': filter_department_cafe_profitability,
+                   'sale_profitability': sale_profitability})
