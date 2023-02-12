@@ -130,17 +130,6 @@
     </form>
 
 
-    {#    <form method="post">{% csrf_token %}#}
-    {#        <label for="from">начало периода</label>#}
-    {#        <input type="text" id="from" name="from">#}
-    {#        <label for="to">конец периода</label>#}
-    {#        <input type="text" id="to" name="to">#}
-    {#        <br>#}
-    {#        <br>#}
-    {#        <button type="submit">Сформировать</button>#}
-    {##}
-    {#    </form>#}
-{#{{ filter_total_sum_dict }}#}
     <br>
     <p>Departmental performance table
 
@@ -151,9 +140,9 @@
 
             <p>empty</p>
 
-{#        {% elif  to_date == 'January 2000' %}#}
-{##}
-{#            from {{ from_date }} to {% now 'Y' %}#}
+            {#        {% elif  to_date == 'January 2000' %}#}
+            {##}
+            {#            from {{ from_date }} to {% now 'Y' %}#}
 
         {% else %}
             from {{ from_date }} to {{ to_date }}
@@ -166,7 +155,7 @@
 
 
         <tr>
-            <th>Департамент</th>
+            <th>Департамент, ДОХОД</th>
             {% for date in dates %}
 
 
@@ -189,7 +178,7 @@
 
                             {% if obj.name == name.name and obj.name != 'X1' and obj.name != 'Основное' and obj.date == date %}
 
-                                <td>{{ obj.value }}</td>
+                                <td>{{ obj.sale_value }}</td>
                             {% endif %}
 
                         {% endfor %}
@@ -201,49 +190,24 @@
         </tr>
 
 
-{#        {% for name in department_names %}#}
-{#            <tr>#}
-{#                <td>Отдел продаж</td>#}
-{#            {% for sale_first in sale_first_list %}#}
-{#                {% for sale_second in sale_second_list %}#}
-{#                    {% for date in dates %}#}
-{##}
-{#                        {% if sale_second.date == date and sale_first.date == date %}#}
-{##}
-{#                            <td>{{ sale_first.value|add:sale_second.value }}</td>#}
-{#                        {% endif %}#}
-{#                        {% endfor %}#}
-{##}
-{#                    {% endfor %}#}
-{#                {% endfor %}#}
-{#            </tr>#}
-{##}
-{##}
-{##}
-{#        <tr>#}
 
-            <td>Отдел продаж views</td>
+        <td>Отдел продаж views</td>
 
-            {% for sale in sale_list %}
-                {% for date in dates %}
+        {% for sale in sale_list %}
+            {% for date in dates %}
 
-                    {% if sale.date == date %}
+                {% if sale.date == date %}
 
-                        <td>{{ sale.value }}</td>
-                    {% endif %}
+                    <td>{{ sale.sale_value }}</td>
+                {% endif %}
 
 
-                {% endfor %}
             {% endfor %}
+        {% endfor %}
         </tr>
 
 
         <tr>
-
-
-
-
-
 
 
         <tr>
@@ -267,8 +231,7 @@
         </tr>
 
 
-
-    <tr>
+        <tr>
 
             <td>ВСЕГО ДОХОД</td>
 
@@ -289,8 +252,378 @@
         </tr>
 
 
+        {#    </table>#}
+        {##}
+        {##}
+        {##}
+        {##}
+        {#        <br>#}
+        {##}
+        {#    <table cellpadding="4" cellspacing="1">#}
+        <tr>
+            <th></th>
+
+
+        </tr>
+
+        <tr>
+            <th>Департамент СЕБЕСТОИМОСТЬ</th>
+            {#            {% for date in dates %}#}
+            {##}
+            {##}
+            <th></th>
+            {##}
+            {##}
+            {#            {% endfor %}#}
+
+        </tr>
+
+        {% for name in department_names %}
+            {% if name.name != 'X1' and name.name != 'Основное' %}
+                <tr>
+
+                <td>{{ name.name }}</td>
+
+                {% for obj in filter_department %}
+                    {% if obj.name != 'X1' and obj.name != 'Основное' %}
+                        {% for date in dates %}
+
+                            {% if obj.name == name.name and obj.name != 'X1' and obj.name != 'Основное' and obj.date == date %}
+
+                                <td> {{ obj.cost_price }} </td>
+                            {% endif %}
+
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+
+        </tr>
+
+
+
+        <td>Отдел продаж views</td>
+
+        {% for sale in sale_list %}
+            {% for date in dates %}
+
+                {% if sale.date == date %}
+
+                    <td>{{ sale.cost_price }}</td>
+                {% endif %}
+
+
+            {% endfor %}
+        {% endfor %}
+        </tr>
+
+
+        <tr>
+
+
+        <tr>
+
+            <td>Сотрудники</td>
+
+            {% for key, value in filter_sum_employees_cost_price_dict.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>ВСЕГО СЕБЕСТОИМОСТЬ</td>
+
+            {% for key, value in filter_total_sum_dict_cost_price.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+            <th></th>
+
+
+        </tr>
+
+        <tr>
+            <th>Департамент МАРЖА</th>
+            {#            {% for date in dates %}#}
+            {##}
+            {##}
+            <th></th>
+            {##}
+            {##}
+            {#            {% endfor %}#}
+
+        </tr>
+        {##}
+        {#        {% for name in department_names %}#}
+        {#            {% if name.name != 'X1' and name.name != 'Основное' %}#}
+        {#                <tr>#}
+        {##}
+        {#                <td>{{ name.name }}</td>#}
+        {##}
+        {#                {% for obj in margin_list_second %}#}
+        {#                    {% if obj.name != 'X1' and obj.name != 'Основное' %}#}
+        {#                        {% for date in dates %}#}
+        {##}
+        {#                            {% if obj.name == name.name and obj.name != 'X1' and obj.name != 'Основное' and obj.date == date %}#}
+        {##}
+        {#                                <td>{{ margin_list.margin }}</td>#}
+        {#                            {% endif %}#}
+        {##}
+        {#                        {% endfor %}#}
+        {#                    {% endif %}#}
+        {#                {% endfor %}#}
+        {#            {% endif %}#}
+        {#        {% endfor %}#}
+        {##}
+        {#        </tr>#}
+        {##}
+        {#     <tr>#}
+
+        <td>Кафе</td>
+
+        {% for key, value in filter_department_cafe_margin.items %}
+            {% for date in dates %}
+
+
+
+                {% if key == date %}
+
+
+                    <td>{{ value }}</td>
+                {% endif %}
+
+            {% endfor %}
+
+        {% endfor %}
+        </tr>
+        <tr>
+
+            <td>Сервис</td>
+
+            {% for key, value in filter_department_serves_margin.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>Отдел продаж views</td>
+
+            {% for key, value in sale_margin.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>Сотрудники</td>
+
+            {% for key, value in filter_margin_employees.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>ВСЕГО МАРЖА</td>
+
+            {% for key, value in margin.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+            <th>Департамент РЕНТАБЕЛЬНОСТЬ</th>
+            {#            {% for date in dates %}#}
+            {##}
+            {##}
+            <th></th>
+            {##}
+            {##}
+            {#            {% endfor %}#}
+
+        </tr>
+
+        <td>Кафе</td>
+
+        {% for key, value in filter_department_cafe_profitability.items %}
+            {% for date in dates %}
+
+
+
+                {% if key == date %}
+
+
+                    <td>{{ value }}</td>
+                {% endif %}
+
+            {% endfor %}
+
+        {% endfor %}
+        </tr>
+        <tr>
+
+            <td>Сервис</td>
+
+            {% for key, value in filter_department_serves_profitability.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>Отдел продаж views</td>
+
+            {% for key, value in sale_profitability.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>Сотрудники</td>
+
+            {% for key, value in filter_profitability_employees.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        <tr>
+
+            <td>ВСЕГО РЕНТАБЕЛЬНОСТЬ</td>
+
+            {% for key, value in profitability.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
 
     </table>
+
+
     </body>
 
 

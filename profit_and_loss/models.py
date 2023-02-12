@@ -1,30 +1,27 @@
 import os
 
 from django.db import models
+from django.utils.deconstruct import deconstructible
 
 
-from uuid import uuid4
+@deconstructible
+class PathRename(object):
+
+    def __init__(self, sub_path):
+        self.path = sub_path
+
+    def __call__(self, instance, filename):
+        ext = filename.split('.')[-1]
+        # set filename as random string
+        filename = '{}.{}'.format('departments', ext)
+        # return the whole path to the file
+        return os.path.join(self.path, filename)
+
+
+path_and_rename = PathRename('files/')
+
 
 # Create your models here.
-
-
-# def path_and_rename(path):  # потом добавить аргумент кого во что переименовать соответственно
-#         def wrapper(instance, filename):
-#             ext = filename.split(".")[-1]
-#             # g filename
-#             filename = "{}.{}".format('departments', ext)
-#             # return the whole path to the file
-#             return os.path.join(path, filename)
-#
-#         return wrapper
-
-
-# def path_and_rename(instance, filename):
-#     ext = filename.split('.')[-1]
-#     filename_start = filename.replace('.' + ext, '')
-#
-#     filename = "%s.%s" % (filename_start, ext)
-#     return os.path.join('files', filename)
 
 
 class Departments(models.Model):
@@ -44,48 +41,21 @@ class Customers(models.Model):
         return self.name
 
 
-# class AllSales(models.Model):
-#     # email = models.EmailField()
-#     name = models.CharField(max_length=255, blank=False, null=False)
-#
-#
-#
-#     # def path_and_rename(path):  # потом добавить аргумент кого во что переименовать соответственно
-#     #     def wrapper(instance, filename):
-#     #         ext = filename.split(".")[-1]
-#     #         # get filename
-#     #         filename = "{}.{}".format('sales', ext)
-#     #         # return the whole path to the file
-#     #         return os.path.join(path, filename)
-#     #
-#     #     return wrapper
-#     #
-#     # file = models.FileField(upload_to=path_and_rename('files/'), null=True)
-#     # file = models.FileField(upload_to=path_and_rename, verbose_name=(u'sales'), null=True)
-#
-#     file = models.FileField(upload_to='files/', null=True)
-#
-#     def __repr__(self):
-#         return 'AllSales(%s, %s)' % (self.name, self.file)
-#
-#     def __str__(self):
-#         return self.name
-
-
 class Result(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
 
-    def path_and_rename(path):  # потом добавить аргумент кого во что переименовать соответственно
-        def wrapper(instance, filename):
-            ext = filename.split(".")[-1]
-            # g filename
-            filename = "{}.{}".format('departments', ext)
-            # return the whole path to the file
-            return os.path.join(path, filename)
+    # def path_and_rename(path):  # потом добавить аргумент кого во что переименовать соответственно
+    #     def wrapper(instance, filename):
+    #         ext = filename.split(".")[-1]
+    #         # g filename
+    #         filename = "{}.{}".format('departments', ext)
+    #         # return the whole path to the file
+    #         return os.path.join(path, filename)
+    #
+    #     return wrapper
+    file = models.FileField(upload_to=path_and_rename, null=True)
 
-        return wrapper
-
-    file = models.FileField(upload_to=path_and_rename('files/'), null=True)
+    # file = models.FileField(upload_to=path_and_rename('files/'), null=True)
     # file = models.FileField(upload_to=path_and_rename, verbose_name=(u'departments'), null=True)
 
     # file = models.FileField(upload_to='files/', null=True)
@@ -103,5 +73,16 @@ class DepartmentsMonth(models.Model):
     buyer_category = models.CharField(max_length=255, blank=False, null=False)
     date = models.DateField(null=True, blank=True, default=None)
     value = models.FloatField(null=True, blank=True, default=None)
-    # cost_price = models.FloatField(null=True, blank=True, default=None)
-    # quantity = models.FloatField(null=True, blank=True, default=None)
+
+    def __str__(self):
+        return self.name
+
+
+class DepartmentsAllData(models.Model):
+    name = models.CharField(max_length=255, blank=False, null=False)
+    buyer_category = models.CharField(max_length=255, blank=False, null=False)
+    product = models.CharField(max_length=255, blank=False, null=False)
+    date = models.DateField(null=True, blank=True, default=None)
+    sale_value = models.FloatField(null=True, blank=True, default=None)
+    cost_price = models.FloatField(null=True, blank=True, default=None)
+    quantity = models.FloatField(null=True, blank=True, default=None)

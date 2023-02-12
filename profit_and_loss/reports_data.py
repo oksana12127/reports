@@ -1,8 +1,10 @@
 import datetime
+import os
 
 import pandas as pd
 
-from profit_and_loss.models import DepartmentsMonth
+# from profit_and_loss.models import DepartmentsMonth
+from profit_and_loss.models import DepartmentsAllData
 
 MONTHS = {
     'Січень': 'January',
@@ -20,16 +22,6 @@ MONTHS = {
 }
 
 
-# def path_and_rename(path):
-#     def wrapper(instance, filename):
-#         ext = filename.split(".")[-1]
-#         # get filename
-#         filename = "{}.{}".format(uuid4().hex, ext)
-#         # return the whole path to the file
-#         return os.path.join(path, filename)
-#     return wrapper
-#
-# file = models.FileField(upload_to=path_and_rename("path/to/upload/"), 'departments.xlsx')
 
 def get_departments_to_dict():
     departments = pd.read_excel('./media/files/departments.xlsx', engine='openpyxl',
@@ -67,62 +59,62 @@ def get_all_to_dict():
     return departments_to_dict
 
 
-DEPARTMENTS = ['X1', 'Основное', 'Сервис', 'Кафе Коцюбинское']
+DEPARTMENTS = ['X1', 'Основное', 'Сервис', 'Кафе']
 PRODUCT = []
 
 
 
-
-def save_data_by_department():
-    # print('departments_to_dict', departments_to_dict)
-    updated_departments_to_dict = []
-    current_name = ''
-    departments_to_dict = get_departments_to_dict()
-    print('departments_to_dict 1', departments_to_dict)
-    for d in departments_to_dict:
-        print('DICTIONARIES', d)
-        for key, value in d.items():
-            # print(key, value)
-            if value in DEPARTMENTS:
-                # print(value)
-                current_name = value
-            # print(current_name)
-        updated_departments_to_dict.append(d)
-        print('updated_departments_to_dict 1', updated_departments_to_dict)
-        # updated_departments_to_dict[-1]['buyer_category'] = current_buyer
-        updated_departments_to_dict[-1]['name'] = current_name
-    print('updated_departments_to_dict 2', updated_departments_to_dict)
-    print('departments_to_dict 2', departments_to_dict)
-    del departments_to_dict[0]
-    del departments_to_dict[0]
-
-    for updated_d in departments_to_dict:
-        print('updated_d', updated_d)
-        for key, value in updated_d.items():
-            # print('d.items:', key, value, updated_d['name'], updated_d['buyer_category'])
-            if key != 'Підрозділ' and key != 'name':
-                # print('KEY !=', key, value, updated_d['name'], updated_d['buyer_category'])
-                key_date = key.split()
-                months_of_report = key_date[0]
-                date_of_string = MONTHS[months_of_report] + ' ' + key_date[1]
-                key_db = datetime.datetime.strptime(date_of_string, '%B %Y')
-                print('key_db', key_db, value, updated_d['name'], updated_d['Підрозділ'])
-
-                if DepartmentsMonth.objects.filter(name=updated_d['name'], buyer_category=updated_d['Підрозділ'],
-                                                   date=key_db).exists():
-
-                    obj = DepartmentsMonth.objects.get(name=updated_d['name'], buyer_category=updated_d['Підрозділ'],
-                                                       date=key_db)
-                    obj.value = value
-                    obj.save()
-
-                else:
-                    obj = DepartmentsMonth.objects.create(name=updated_d.get('name'))
-                    obj.name = updated_d['name']
-                    obj.buyer_category = updated_d['Підрозділ']
-                    obj.date = key_db
-                    obj.value = value
-                    obj.save()
+#
+# def save_data_by_department(): #my previous function
+#     # print('departments_to_dict', departments_to_dict)
+#     updated_departments_to_dict = []
+#     current_name = ''
+#     departments_to_dict = get_departments_to_dict()
+#     print('departments_to_dict 1', departments_to_dict)
+#     for d in departments_to_dict:
+#         print('DICTIONARIES', d)
+#         for key, value in d.items():
+#             # print(key, value)
+#             if value in DEPARTMENTS:
+#                 # print(value)
+#                 current_name = value
+#             # print(current_name)
+#         updated_departments_to_dict.append(d)
+#         print('updated_departments_to_dict 1', updated_departments_to_dict)
+#         # updated_departments_to_dict[-1]['buyer_category'] = current_buyer
+#         updated_departments_to_dict[-1]['name'] = current_name
+#     print('updated_departments_to_dict 2', updated_departments_to_dict)
+#     print('departments_to_dict 2', departments_to_dict)
+#     del departments_to_dict[0]
+#     del departments_to_dict[0]
+#
+#     for updated_d in departments_to_dict:
+#         print('updated_d', updated_d)
+#         for key, value in updated_d.items():
+#             # print('d.items:', key, value, updated_d['name'], updated_d['buyer_category'])
+#             if key != 'Підрозділ' and key != 'name':
+#                 # print('KEY !=', key, value, updated_d['name'], updated_d['buyer_category'])
+#                 key_date = key.split()
+#                 months_of_report = key_date[0]
+#                 date_of_string = MONTHS[months_of_report] + ' ' + key_date[1]
+#                 key_db = datetime.datetime.strptime(date_of_string, '%B %Y')
+#                 print('key_db', key_db, value, updated_d['name'], updated_d['Підрозділ'])
+#
+#                 if DepartmentsMonth.objects.filter(name=updated_d['name'], buyer_category=updated_d['Підрозділ'],
+#                                                    date=key_db).exists():
+#
+#                     obj = DepartmentsMonth.objects.get(name=updated_d['name'], buyer_category=updated_d['Підрозділ'],
+#                                                        date=key_db)
+#                     obj.value = value
+#                     obj.save()
+#
+#                 else:
+#                     obj = DepartmentsMonth.objects.create(name=updated_d.get('name'))
+#                     obj.name = updated_d['name']
+#                     obj.buyer_category = updated_d['Підрозділ']
+#                     obj.date = key_db
+#                     obj.value = value
+#                     obj.save()
 
 
 # save_data_by_department()
@@ -130,15 +122,19 @@ def save_data_by_department():
 def save_all_data():
     updated_departments_to_dict = []
     new_departments_to_dict = []
-    # finish_departments_to_dict = []
     current_name = ''
     departments_to_dict = get_all_to_dict()
     for d in departments_to_dict:
+        print('d', type(d))
         for key, value in d.items():
             if value in DEPARTMENTS:
                 current_name = value
         updated_departments_to_dict.append(d)
         updated_departments_to_dict[-1]['name'] = current_name
+    #
+    # print('departments_to_dict', departments_to_dict)
+    # print('updated_departments_to_dict', updated_departments_to_dict)
+
     line_of_tables_departments = 0
     for to_dict in updated_departments_to_dict:
         del to_dict[('Unnamed: 0_level_0', 'Unnamed: 0_level_1', 'Unnamed: 0_level_2', 'Unnamed: 0_level_3')]
@@ -154,10 +150,51 @@ def save_all_data():
         line_of_tables_departments += 1
         print(line_of_tables_departments)
         for key, value in finish_dict.items():
-            print('key, value', key, value)
+            if key != 'name' and key != 'buyer_category':
+                # print('key, value', key[0], value)
+                key_date = key[0].split()
+                months_of_report = key_date[0]
+                date_of_string = MONTHS[months_of_report] + ' ' + key_date[1]
+                key_db = datetime.datetime.strptime(date_of_string, '%B %Y')
+                product = key[1]
 
+                if DepartmentsAllData.objects.filter(name=finish_dict['name'],
+                                                     buyer_category=finish_dict['buyer_category'], product=product,
+                                                     date=key_db).exists():
+                    obj = DepartmentsAllData.objects.get(name=finish_dict['name'],
+                                                         buyer_category=finish_dict['buyer_category'], product=product,
+                                                         date=key_db)
 
+                    if key[2] == 'Вартість продажу (грн)':
+                        obj.sale_value = value
+                        obj.save()
 
+                    elif key[2] == 'Собівартість  (грн)':
+                        obj.cost_price = value
+                        obj.save()
+
+                    elif key[2] == 'Кількість':
+                        obj.cost_price = value
+                        obj.save()
+
+                else:
+                    obj = DepartmentsAllData.objects.create(product=product)
+                    obj.product = product
+                    obj.name = finish_dict['name']
+                    obj.buyer_category = finish_dict['buyer_category']
+                    obj.date = key_db
+
+                    if key[2] == 'Вартість продажу (грн)':
+                        obj.sale_value = value
+                        obj.save()
+
+                    elif key[2] == 'Собівартість  (грн)':
+                        obj.cost_price = value
+                        obj.save()
+
+                    elif key[2] == 'Кількість':
+                        obj.quantity = value
+                        obj.save()
 
 
 
