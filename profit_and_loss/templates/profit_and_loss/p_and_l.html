@@ -2,8 +2,265 @@
 
 {% block content %}
 
-<h1>P$L common</h1>
+    <h1>sales by department</h1>
 
-<p>Welcome to <em>P$L common</em></p>
+    <p>Welcome to <em>sales by department</em></p>
+
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.js"></script>
+        <script type="text/javascript"
+                src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
+        <link rel="stylesheet" type="text/css" media="screen"
+              href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css">
+
+        <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+        <script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
+        {#        <script type="text/javascript">#}
+
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $(".monthPicker").datepicker({
+                    dateFormat: 'MM yy',
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+
+                    onClose: function (dateText, inst) {
+                        var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                        var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                        $(this).val($.datepicker.formatDate('MM yy', new Date(year, month, 1)));
+                    }
+                });
+
+                $(".monthPicker").focus(function () {
+                    $(".ui-datepicker-calendar").hide();
+                    $("#ui-datepicker-div").position({
+                        my: "center top",
+                        at: "center bottom",
+                        of: $(this)
+                    });
+                });
+            });
+        </script>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $(".monthPickerTo").datepicker({
+                    dateFormat: 'MM yy',
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+
+                    onClose: function (dateText, inst) {
+                        var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                        var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                        $(this).val($.datepicker.formatDate('MM yy', new Date(year, month, 1)));
+                    }
+                });
+
+                $(".monthPickerTo").focus(function () {
+                    $(".ui-datepicker-calendar").hide();
+                    $("#ui-datepicker-div").position({
+                        my: "center top",
+                        at: "center bottom",
+                        of: $(this)
+                    });
+                });
+            });
+        </script>
+
+
+        <style type="text/css">
+
+            TABLE {
+                background: #9dddbb; /* Цвет фона таблицы */
+                border: 5px double #fff; /* Рамка вокруг таблицы */
+            }
+
+            TD, TH {
+                padding: 5px; /* Поля вокруг текста */
+                border: 1px solid #fff; /* Рамка вокруг ячеек */
+            }
+
+
+        </style>
+    </head>
+    <body>
+
+
+    <form method="post" autocomplete="off">{% csrf_token %}
+        <label for="month">from: </label>
+        <input type="text" autocomplete="off" id="from" name="from" class="monthPicker"/>
+        <label for="month">to: </label>
+        <input type="text" autocomplete="off" id="to" name="to" class="monthPickerTo"/>
+        <button type="submit">Сформировать</button>
+    </form>
+
+
+    <br>
+    <p>Departmental performance table
+
+
+
+
+        {% if from_date  == 'January 2000' and to_date  == 'January 2000' %}
+
+            <p>empty</p>
+
+            {#        {% elif  to_date == 'January 2000' %}#}
+            {##}
+            {#            from {{ from_date }} to {% now 'Y' %}#}
+
+        {% else %}
+            from {{ from_date }} to {{ to_date }}
+        {% endif %}
+    </p>
+
+
+    {{ sum_related_buyer_category_retail_sale }}
+
+
+    <br>
+
+    <table cellpadding="4" cellspacing="1">
+
+
+        <tr>
+            <th>ДОХОД</th>
+            {% for date in dates %}
+
+
+                <th>{{ date }}</th>
+
+
+            {% endfor %}
+
+        </tr>
+
+        <tr>
+
+            <td>ecommerce</td>
+            <td></td>
+        </tr>
+
+
+        <tr>
+            <td>кофе</td>
+            <td>{{ sum_coffee_buyer_category_retail_sale }}</td>
+
+        </tr>
+
+        <tr>
+            <td>сопутка</td>
+            <td>{{ sum_related_buyer_category_retail_sale }}</td>
+
+        </tr>
+
+        <tr>
+            <td>химия</td>
+            <td>{{ sum_materials_buyer_category_retail_sale }}</td>
+
+        </tr>
+
+        </tr>
+
+
+        <td>Отдел продаж views</td>
+
+        {% for sale in sale_list %}
+            {% for date in dates %}
+
+                {% if sale.date == date %}
+
+                    <td>{{ sale.sale_value }}</td>
+                {% endif %}
+
+
+            {% endfor %}
+        {% endfor %}
+        </tr>
+
+
+        <tr>
+
+
+        <tr>
+
+            {#            <td>Сотрудники 1</td>#}
+
+            {% for name in department_names %}
+                {% if name.name == 'Сотрудники' %}
+                    <tr>
+
+                    <td>{{ name.name }}</td>
+
+                    {% for obj in filter_department %}
+                        {% if obj.name == 'Сотрудники' %}
+                            {% for date in dates %}
+
+                                {% if obj.name == name.name and obj.name == 'Сотрудники' and obj.date == date %}
+
+                                    <td>{{ obj.name }}</td>
+                                {% endif %}
+
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+            </tr>
+
+
+        <tr>
+
+            <td>ВСЕГО ДОХОД</td>
+
+            {% for key, value in filter_total_sum_dict.items %}
+                {% for date in dates %}
+
+
+
+                    {% if key == date %}
+
+
+                        <td>{{ value }}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+
+
+        {#    </table>#}
+        {##}
+        {##}
+        {##}
+        {##}
+        {#        <br>#}
+        {##}
+        {#    <table cellpadding="4" cellspacing="1">#}
+        <tr>
+            <th></th>
+
+
+        </tr>
+
+
+    </table>
+
+
+    </body>
+
+
+
+
+
 
 {% endblock %}

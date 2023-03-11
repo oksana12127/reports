@@ -22,11 +22,10 @@ MONTHS = {
 }
 
 
-
 def get_departments_to_dict():
     departments = pd.read_excel('./media/files/departments.xlsx', engine='openpyxl',
-                                header=6) # not .xlsx, reading started from line 7, 7th taken as heading
-                                        # engine='openpyxl' - for excel 2003 (xlsx)
+                                header=6)  # not .xlsx, reading started from line 7, 7th taken as heading
+    # engine='openpyxl' - for excel 2003 (xlsx)
     departments_to_dict_nan = pd.DataFrame(departments)
     print('department+s_to_dict_nan', departments_to_dict_nan)
     departments_to_dict_null = departments_to_dict_nan.fillna(0)
@@ -60,8 +59,11 @@ def get_all_to_dict():
 
 
 DEPARTMENTS = ['X1', 'Основное', 'Сервис', 'Кафе']
-PRODUCT = []
-
+PRODUCT = ['КОФЕ', 'СУПУТНІ ТОВАРИ', 'Материалы', 'ДУБЛИ и Старая номенклатура', 'маркетинг', 'МШП',
+           'Новые товары в CRM', 'ос_нма', 'Офис ПОСУДА', 'ПРОЧЕЕ ОБОРУДОВАНИЕ', 'РЕМОНТ', 'Служебные', 'УСЛУГИ',
+           'я Запчасти', 'я Запчасти (постовые машины)']
+CATEGORY_AKM = ['Автоматические и Профмашины', 'АВТОМАТИЧЕСКИЕ КИЕВ', 'КИЕВ']
+CATEGORY_RETAIL = ['0', 'Сотрудники', 'РОЗНИЦА']
 
 
 #
@@ -119,6 +121,33 @@ PRODUCT = []
 
 # save_data_by_department()
 
+
+def form_date(req):
+    from_date = req.POST.get('from')
+    to_date = req.POST.get('to')
+    print('from_date', from_date)
+    if req.POST.get('from') and req.POST.get('to'):
+        from_date_new = datetime.datetime.strptime(from_date, '%B %Y')
+        print("from_date_new", from_date_new)
+        to_date_new = datetime.datetime.strptime(to_date, '%B %Y')
+    elif req.POST.get('from'):
+        from_date_new = datetime.datetime.strptime(from_date, '%B %Y')
+        to_date_get = datetime.datetime.now()
+        to_date = to_date_get.strftime('%B %Y')
+        to_date_new = to_date_get.strftime('%Y-%m-%d')
+
+    else:
+        from_date = 'January 2000'
+        to_date = 'January 2000'
+        from_date_new = datetime.datetime.strptime(from_date, '%B %Y')
+        to_date_new = datetime.datetime.strptime(to_date, '%B %Y')
+
+    order = DepartmentsAllData.objects.filter(date__gte=from_date_new, date__lte=to_date_new)
+    dates = order.dates('date', 'month')
+
+    return {'dates': dates, 'from_date': from_date, 'to_date': to_date}
+
+
 def save_all_data():
     updated_departments_to_dict = []
     new_departments_to_dict = []
@@ -127,6 +156,7 @@ def save_all_data():
     for d in departments_to_dict:
         print('d', type(d))
         for key, value in d.items():
+            # print('key, value', key, value)
             if value in DEPARTMENTS:
                 current_name = value
         updated_departments_to_dict.append(d)
@@ -138,7 +168,8 @@ def save_all_data():
     line_of_tables_departments = 0
     for to_dict in updated_departments_to_dict:
         del to_dict[('Unnamed: 0_level_0', 'Unnamed: 0_level_1', 'Unnamed: 0_level_2', 'Unnamed: 0_level_3')]
-        to_dict['buyer_category'] = to_dict.pop(('Підрозділ', 'Покупець (категорії)', 'Unnamed: 1_level_2', 'Unnamed: 1_level_3'))
+        to_dict['buyer_category'] = to_dict.pop(
+            ('Підрозділ', 'Покупець (категорії)', 'Unnamed: 1_level_2', 'Unnamed: 1_level_3'))
         new_departments_to_dict.append(to_dict)
 
     for new_dict in new_departments_to_dict:
@@ -197,9 +228,6 @@ def save_all_data():
                         obj.save()
 
 
-
-
-
 def additional_code():
     upload_date = 'Січень 2022 р.'.split()
     months_of_report = upload_date[0]
@@ -217,9 +245,9 @@ def additional_code():
 
         line_of_tables_departments += 1
 
-
     # print('departments_to_dict', departments_to_dict)
-    print('Підрозділ LISTS', get_departments_to_dict['Підрозділ'].tolist())  # data from a column and convert it to a list of values
+    print('Підрозділ LISTS',
+          get_departments_to_dict['Підрозділ'].tolist())  # data from a column and convert it to a list of values
 
     departments_to_dict_service = next(x for x in get_departments_to_dict if x["Підрозділ"] == "Сервис")
     departments_to_dict_employee = list(filter(lambda item: item['Підрозділ'] == 'Сотрудники', get_departments_to_dict))
@@ -249,14 +277,12 @@ def additional_code():
 #         'from_date': 'January 2001',
 #         'to_date': 'January 2022'
 #     }
-    # reg = requests.get(url, params=data)
-    # r = requests.post(url, data=data)
-    # reg.encoding
+# reg = requests.get(url, params=data)
+# r = requests.post(url, data=data)
+# reg.encoding
 
 
-    # print('GET', reg.url)
+# print('GET', reg.url)
 
 
-    # print('POST', r)
-
-
+# print('POST', r)

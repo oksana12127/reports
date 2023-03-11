@@ -7,6 +7,7 @@ from django.shortcuts import render
 
 from profit_and_loss.forms import ResultForm
 from profit_and_loss.models import DepartmentsAllData
+from profit_and_loss.reports_data import DEPARTMENTS, PRODUCT, CATEGORY_AKM, CATEGORY_RETAIL, form_date
 
 
 def index(request):
@@ -169,25 +170,11 @@ def upload_result(request):
 
 @login_required
 def sales_by_department(request):
-    from_date = request.POST.get('from')
-    to_date = request.POST.get('to')
-    print('from_date', from_date)
-    if request.POST.get('from') and request.POST.get('to'):
-        from_date_new = datetime.datetime.strptime(from_date, '%B %Y')
-        print("from_date_new", from_date_new)
-        to_date_new = datetime.datetime.strptime(to_date, '%B %Y')
-    elif request.POST.get('from'):
-        from_date_new = datetime.datetime.strptime(from_date, '%B %Y')
-        to_date_get = datetime.datetime.now()
-        to_date = to_date_get.strftime('%B %Y')
-        to_date_new = to_date_get.strftime('%Y-%m-%d')
+    dates_form_date = form_date(request)
+    dates = dates_form_date.get('dates')
+    from_date = dates_form_date.get('from_date')
+    to_date = dates_form_date.get('to_date')
 
-    else:
-        from_date = 'January 2000'
-        to_date = 'January 2000'
-        from_date_new = datetime.datetime.strptime(from_date, '%B %Y')
-        to_date_new = datetime.datetime.strptime(to_date, '%B %Y')
-    order = DepartmentsAllData.objects.filter(date__gte=from_date_new, date__lte=to_date_new)
     filter_department = []
 
     filter_total_sum_dict = {}
@@ -201,7 +188,7 @@ def sales_by_department(request):
     filter_profitability_employees = {}
     margin = {}
     profitability = {}
-    dates = order.dates('date', 'month')
+
     sale_list = []
     sale_margin = {}
     sale_profitability = {}
@@ -227,7 +214,7 @@ def sales_by_department(request):
 
         filter_profitability_employees[date] = int(
             ((filter_sum_employees_dict[date] - filter_sum_employees_cost_price_dict[date]) / filter_sum_employees_dict[
-                date]) * 100) / 100
+                date]) * 100) / 100 * 100
 
         sum = DepartmentsAllData.objects.filter(date=date, product='Підсумок')
         total_sum = sum.aggregate(Sum('sale_value'))['sale_value__sum']
@@ -238,7 +225,7 @@ def sales_by_department(request):
         filter_total_sum_dict_cost_price[date] = int(total_sum_cost_price / 2 * 100) / 100
         margin[date] = int((filter_total_sum_dict[date] - filter_total_sum_dict_cost_price[date]) * 100) / 100
         profitability[date] = int(((filter_total_sum_dict[date] - filter_total_sum_dict_cost_price[date]) /
-                                   filter_total_sum_dict[date]) * 100) / 100
+                                   filter_total_sum_dict[date]) * 100) / 100 * 100
 
         for department in departments:
             if department.product == 'Підсумок':
@@ -277,47 +264,58 @@ def sales_by_department(request):
                     sale_first_sale_value = sale_first.sale_value
                     sale_first_cost_price = sale_first.cost_price
 
-                    sale_margin[date] = sale_first_sale_value - sale_first_cost_price
+                    sale_margin[date] = int((sale_first_sale_value - sale_first_cost_price) * 100) / 100
                     sale_profitability[date] = int(
-                        (sale_first_sale_value - sale_first_cost_price) / sale_first_sale_value * 100) / 100
+                        (sale_first_sale_value - sale_first_cost_price) / sale_first_sale_value * 100) / 100 * 100
 
         sale_list.append(sale_first)
 
     for filter_department_margin in filter_department:
-        if filter_department_margin.name == 'Сервис':
-            for date in dates:
-                filter_department_serves_margin[
-                    date] = filter_department_margin.sale_value - filter_department_margin.cost_price
-                filter_department_serves_profitability[
-                    date] = int((
-                                        filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100
+        for date in dates:
+            if filter_department_margin.name == 'Сервис':
+                if date == filter_department_margin.date:
+                    print('FILTER_department_margin', filter_department_margin.sale_value,
+                          filter_department_margin.date)
+                    filter_department_serves_margin[
+                        date] = int(
+                        (filter_department_margin.sale_value - filter_department_margin.cost_price) * 100) / 100
+                    filter_department_serves_profitability[
+                        date] = int((
+                                            filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100 * 100
 
     for filter_department_margin in filter_department:
         if filter_department_margin.name == 'Кафе':
             for date in dates:
-                filter_department_cafe_margin[date] = int(
-                    (filter_department_margin.sale_value - filter_department_margin.cost_price) * 100) / 100
-                filter_department_cafe_profitability[
-                    date] = int((
-                                        filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100) / 100
+                if date == filter_department_margin.date:
+                    filter_department_cafe_margin[date] = int(
+                        (filter_department_margin.sale_value - filter_department_margin.cost_price) * 100) / 100
+                    filter_department_cafe_profitability[
+                        date] = int((
+                                            filter_department_margin.sale_value - filter_department_margin.cost_price) / filter_department_margin.sale_value * 100)
 
     department_names = DepartmentsAllData.objects.values('name').distinct()
-    today = datetime.datetime.today()
-    our_year = today.strftime('%Y')
+    print('department_names', department_names)
+    # today = datetime.datetime.today()
+    # our_year = today.strftime('%Y')
 
-    print('datetime_now', type(our_year))
+    # print('datetime_now', type(our_year))
     print('filter_total_sum_dict', filter_total_sum_dict)
     print('sale_list', sale_list)
     print('filter_sum_employees_dict', filter_sum_employees_dict)
     print('filter_sum_employees_cost_price_dict', filter_sum_employees_cost_price_dict)
     print('filter_department', filter_department)
+    for filter_department_margin in filter_department:
+        print('filter_department_margin', filter_department_margin.date, filter_department_margin.buyer_category)
+
+    print('filter_department_serves_margin', filter_department_serves_margin)
 
     return render(request, 'profit_and_loss/sales_by_department.html',
                   {'filter_department': filter_department, 'dates': dates, 'department_names': department_names,
                    'filter_sum_employees_dict': filter_sum_employees_dict,
                    'filter_sum_employees_cost_price_dict': filter_sum_employees_cost_price_dict, 'from_date': from_date,
                    'to_date': to_date,
-                   "our_year": our_year, 'filter_total_sum_dict': filter_total_sum_dict,
+                   # "our_year": our_year,
+                   'filter_total_sum_dict': filter_total_sum_dict,
                    'filter_total_sum_dict_cost_price': filter_total_sum_dict_cost_price, 'margin': margin,
                    'sale_list': sale_list, 'filter_margin_employees': filter_margin_employees,
                    'sale_margin': sale_margin, 'filter_department_serves_margin': filter_department_serves_margin,
@@ -326,3 +324,61 @@ def sales_by_department(request):
                    'filter_department_serves_profitability': filter_department_serves_profitability,
                    'filter_department_cafe_profitability': filter_department_cafe_profitability,
                    'sale_profitability': sale_profitability})
+
+
+@login_required
+def p_and_l(request):
+    dates_form_date = form_date(request)
+    dates = dates_form_date.get('dates')
+    from_date = dates_form_date.get('from_date')
+    to_date = dates_form_date.get('to_date')
+
+    filter_buyer_category = []
+    coffee_buyer_category_akm = []
+
+    related_buyer_category_retail_sale = []
+    materials_buyer_category_retail_sale = []
+    coffee_buyer_category_retail_sale = []
+
+    for date in dates:
+        departments = DepartmentsAllData.objects.filter(date=date)
+
+        for department in departments:
+
+            if department.buyer_category not in DEPARTMENTS:
+                if department.product in PRODUCT:
+                    filter_buyer_category.append(department)
+
+        for buyer_category in filter_buyer_category:
+            if buyer_category.name != 'Сервис':
+                if buyer_category.buyer_category in CATEGORY_RETAIL:
+                    if buyer_category.product == 'СУПУТНІ ТОВАРИ':
+                        related_retail = buyer_category.sale_value
+
+                        related_buyer_category_retail_sale.append(related_retail)
+
+                    if buyer_category.product == 'Материалы':
+                        materials_retail = buyer_category.sale_value
+
+                        materials_buyer_category_retail_sale.append(materials_retail)
+
+                    if buyer_category.product != 'СУПУТНІ ТОВАРИ' and buyer_category.product != 'Материалы':
+                        coffee_retail = buyer_category.sale_value
+
+                        coffee_buyer_category_retail_sale.append(coffee_retail)
+
+        sum_related_buyer_category_retail_sale = sum(related_buyer_category_retail_sale)
+        print('sum_related_buyer_category_retail_sale', sum_related_buyer_category_retail_sale)
+
+        sum_coffee_buyer_category_retail_sale = sum(coffee_buyer_category_retail_sale)
+        print('sum_coffee_buyer_category_retail_sale', sum_coffee_buyer_category_retail_sale)
+
+        sum_materials_buyer_category_retail_sale = sum(materials_buyer_category_retail_sale)
+        print('sum_materials_buyer_category_retail_sale', sum_materials_buyer_category_retail_sale)
+
+    return render(request, 'profit_and_loss/p_and_l.html', {'dates': dates,
+                                                            'from_date': from_date,
+                                                            'to_date': to_date,
+                                                            'sum_related_buyer_category_retail_sale': sum_related_buyer_category_retail_sale,
+                                                            'sum_materials_buyer_category_retail_sale': sum_materials_buyer_category_retail_sale,
+                                                            'sum_coffee_buyer_category_retail_sale': sum_coffee_buyer_category_retail_sale})
